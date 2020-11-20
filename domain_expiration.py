@@ -8,6 +8,8 @@ from attr import attrs, attrib, Factory
 import whois
 from whois.parser import PywhoisError, WhoisEntry
 
+NOT_EXIST_RESULT = {'domain': 'Not Exist', 'exist': False}
+
 
 class RunConfig(NamedTuple):
     target_domain: str
@@ -71,19 +73,21 @@ class DomainChecker(object):
             whois_info = whois.whois(self.config.target_domain)
 
             self.result = self.parse_info(whois_info)
-            self.create_string()
-
-            if not self.config.quiet:
-                PrettyPrinter.run(self.result)
-
-            if self.config.write:
-                ReadWriteDocuments.write_result_to_file(self.config.output, self.result)
         else:
-            pass
+            self.result = NOT_EXIST_RESULT
+
+        self.create_string()
+
+        if not self.config.quiet:
+            PrettyPrinter.run(self.result)
+
+        if self.config.write:
+            ReadWriteDocuments.write_result_to_file(self.config.output, self.result)
 
     @staticmethod
     def parse_info(whois_info: WhoisEntry) -> Dict[str, str]:
         return {
+            'exist': True,
             'expiration_date': str(whois_info.expiration_date),
             'expired': whois_info.expiration_date < datetime.now(),
             'expire_soon': (whois_info.expiration_date - datetime.now()).days <= 60,

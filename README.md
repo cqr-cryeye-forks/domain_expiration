@@ -30,7 +30,7 @@ optional arguments:
 
 ## Output
 Domain info:
-is expired, if will expire soon
+is exist, is expired, if will expire soon
 expiration date, creation date, updated date, country
 can be written to a file or into terminal output in text or JSON formats
 
