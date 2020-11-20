@@ -1,3 +1,4 @@
 asyncio
 attr
+attrs
 python-whois
