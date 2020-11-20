@@ -87,13 +87,16 @@ class DomainChecker(object):
 
     @staticmethod
     def parse_info(whois_info: WhoisEntry) -> Dict[str, str]:
+        updated_dates = whois_info.updated_date
+        if type(updated_dates) == list:
+            updated_dates = list(map(str, whois_info.updated_date))
         return {
             'exist': True,
             'expiration_date': str(whois_info.expiration_date),
             'expired': whois_info.expiration_date < datetime.now(),
             'expire_soon': (whois_info.expiration_date - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION,
             'creation_date': str(whois_info.creation_date),
-            'updated_date': str(whois_info.updated_date),
+            'updated_dates': type(updated_dates) == datetime and str(updated_dates) or updated_dates,
             'country': whois_info.country,
         }
 
