@@ -1,6 +1,6 @@
 # Domain Expiration
 
-Simple command-line tool check domain
+Simple command-line tool to check domain
 
 ## Installation
 ```
