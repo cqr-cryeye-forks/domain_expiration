@@ -8,6 +8,7 @@ from attr import attrs, attrib, Factory
 import whois
 from whois.parser import PywhoisError, WhoisEntry
 
+DEFAULT_DAYS_EXPIRATION = 60
 NOT_EXIST_RESULT = {'domain': 'Not Exist', 'exist': False}
 
 
@@ -90,7 +91,7 @@ class DomainChecker(object):
             'exist': True,
             'expiration_date': str(whois_info.expiration_date),
             'expired': whois_info.expiration_date < datetime.now(),
-            'expire_soon': (whois_info.expiration_date - datetime.now()).days <= 60,
+            'expire_soon': (whois_info.expiration_date - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION,
             'creation_date': str(whois_info.creation_date),
             'updated_date': str(whois_info.updated_date),
             'country': whois_info.country,
