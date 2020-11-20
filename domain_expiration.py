@@ -1,4 +1,5 @@
 import json
+import socket
 import asyncio
 import argparse
 from datetime import datetime
@@ -72,7 +73,6 @@ class DomainChecker(object):
         """
         if await self.is_registered():
             whois_info = whois.whois(self.config.target_domain)
-
             self.result = self.parse_info(whois_info)
         else:
             self.result = NOT_EXIST_RESULT
@@ -113,7 +113,7 @@ class DomainChecker(object):
         """
         try:
             w = whois.whois(self.config.target_domain)
-        except PywhoisError:
+        except (PywhoisError, socket.herror):
             return False
         else:
             return bool(w.domain_name)
