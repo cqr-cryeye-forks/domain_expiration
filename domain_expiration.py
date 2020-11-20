@@ -10,7 +10,7 @@ import whois
 from whois.parser import PywhoisError, WhoisEntry
 
 DEFAULT_DAYS_EXPIRATION = 60
-NOT_EXIST_RESULT = {'domain': 'Not Exist', 'exist': False}
+NOT_EXIST_RESULT = {'domain': 'Not Exist', 'exist': False, 'expired': True}
 
 
 class RunConfig(NamedTuple):
