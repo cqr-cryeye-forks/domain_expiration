@@ -62,7 +62,7 @@ class DomainChecker(object):
         """
         reads config variable and creates class
         :param config: RunConfig config for starting
-        :return: Domain Expiration
+        :return: Domain Checker
         """
         return cls(config=config)
 
