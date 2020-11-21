@@ -125,7 +125,7 @@ class DomainChecker(object):
         return self._result
 
     @result.setter
-    def result(self, result) -> None:
+    def result(self, result:  Union[str, Dict[str, str]]) -> None:
         self._result = result
 
 
