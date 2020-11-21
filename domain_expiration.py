@@ -29,9 +29,9 @@ class ReadWriteDocuments(object):
     def write_result_to_file(cls, result_file: str, result: str) -> None:
         """
         writes information to a file
-        :param result_file: str
-        :param result: str
-        result list with found vulnerable cookies
+        :param result_file: str file name to save result
+        :param result: str string with result to save in file
+
         :return: None
         """
         obj = cls(result_file)
