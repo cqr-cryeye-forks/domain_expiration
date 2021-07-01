@@ -19,7 +19,7 @@ Domain Expiration
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t TARGET, --target TARGET
+  -t TARGET, --target TARGET domain name
                         target url
   -o OUTPUT, --output OUTPUT
                         file to save result in
