@@ -6,7 +6,9 @@ from datetime import datetime
 from typing import NamedTuple, Dict, Union
 from attr import attrs, attrib, Factory
 
+# noinspection PyPackageRequirements
 import whois
+# noinspection PyPackageRequirements
 from whois.parser import PywhoisError, WhoisEntry
 
 DEFAULT_DAYS_EXPIRATION = 60
@@ -89,11 +91,14 @@ class DomainChecker(object):
     def parse_info(whois_info: WhoisEntry) -> Dict[str, str]:
         updated_dates = type(whois_info.updated_date) == list \
                         and list(map(str, whois_info.updated_date)) or whois_info.updated_date
+        expiration_date = whois_info.expiration_date[0] if type(whois_info.expiration_date) == list \
+            else whois_info.expiration_date
+
         return {
             'exist': True,
             'expiration_date': str(whois_info.expiration_date),
-            'expired': whois_info.expiration_date < datetime.now(),
-            'expire_soon': (whois_info.expiration_date - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION,
+            'expired': expiration_date < datetime.now(),
+            'expire_soon': (expiration_date - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION,
             'creation_date': str(whois_info.creation_date),
             'updated_dates': type(updated_dates) == datetime and str(updated_dates) or updated_dates,
             'country': whois_info.country,
@@ -103,9 +108,7 @@ class DomainChecker(object):
         if self.config.json:
             self.result = json.dumps(self.result)
         else:
-            string = ''
-            for key, value in self.result.items():
-                string += f'{key}: {value}\n'
+            string = ''.join(f'{key}: {value}\n' for key, value in self.result.items())
             self.result = string
 
     async def is_registered(self) -> bool:
@@ -125,7 +128,7 @@ class DomainChecker(object):
         return self._result
 
     @result.setter
-    def result(self, result:  Union[str, Dict[str, str]]) -> None:
+    def result(self, result: Union[str, Dict[str, str]]) -> None:
         self._result = result
 
 
