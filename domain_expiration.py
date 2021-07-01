@@ -108,8 +108,7 @@ class DomainChecker(object):
         if self.config.json:
             self.result = json.dumps(self.result)
         else:
-            string = ''.join(f'{key}: {value}\n' for key, value in self.result.items())
-            self.result = string
+            self.result = ''.join(f'{key}: {value}\n' for key, value in self.result.items())
 
     async def is_registered(self) -> bool:
         """
