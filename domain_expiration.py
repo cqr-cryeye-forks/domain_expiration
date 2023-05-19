@@ -107,7 +107,7 @@ class DomainChecker(object):
             if dates:
                 if not isinstance(dates, list):
                     dates = [dates]
-                dates = [date.isoformat() for date in dates]
+                dates = [date.strftime('%Y-%m-%d, %H:%M:%S') for date in dates]
             return dates
 
         def process_values(values):
