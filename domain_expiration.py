@@ -116,8 +116,11 @@ class DomainChecker(object):
                     values = [values]
                 if "REDACTED FOR PRIVACY" in values:
                     values.remove("REDACTED FOR PRIVACY")
-                    if len(values) == 0:
+                    if len(values) == 0 or not values:
                         values = []
+            else:
+                values = []
+
             return values
 
         return {
