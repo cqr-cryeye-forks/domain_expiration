@@ -128,7 +128,7 @@ class DomainChecker(object):
             "name_servers": process_values_rm_symbols(whois_info.name_servers, r"\s*\r?\n\s*"),
             'registrar': process_values_rm_symbols(whois_info.registrar, r"\s+d/b/a\s+"),
 
-            'expiration_date': process_creation_dates(whois_info.expiration_date[0]),
+            'expiration_date': process_creation_dates(whois_info.expiration_date)[0],
             'expired': check_expired < datetime.now(),
             'expire_soon': (check_expired - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION,
             'creation_date': process_creation_dates(whois_info.creation_date)[0],
