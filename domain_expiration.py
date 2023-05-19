@@ -5,6 +5,7 @@ import argparse
 from datetime import datetime
 from typing import NamedTuple, Dict, Union
 from attr import attrs, attrib, Factory
+import re
 
 # noinspection PyPackageRequirements
 import whois
@@ -89,19 +90,57 @@ class DomainChecker(object):
 
     @staticmethod
     def parse_info(whois_info: WhoisEntry) -> Dict[str, str]:
-        updated_dates = type(whois_info.updated_date) == list \
-                        and list(map(str, whois_info.updated_date)) or whois_info.updated_date
-        expiration_date = whois_info.expiration_date[0] if type(whois_info.expiration_date) == list \
+
+        debug_check_info_from_whois = whois_info
+
+        check_expired = whois_info.expiration_date[0] if type(whois_info.expiration_date) == list \
             else whois_info.expiration_date
 
+        def process_values_rm_symbols(values, delimiters_pattern):
+            if values:
+                if not isinstance(values, list):
+                    values = re.split(delimiters_pattern, str(values))
+                    values = list(filter(None, values))
+            return values
+
+        def process_creation_dates(dates):
+            if dates:
+                if not isinstance(dates, list):
+                    dates = [dates]
+                dates = [date.isoformat() for date in dates]
+            return dates
+
+        def process_values(values):
+            if values:
+                if not isinstance(values, list):
+                    values = [values]
+                if "REDACTED FOR PRIVACY" in values:
+                    values.remove("REDACTED FOR PRIVACY")
+                    if len(values) == 0:
+                        values = None
+            return values
+
         return {
+
             'exist': True,
-            'expiration_date': str(whois_info.expiration_date),
-            'expired': expiration_date < datetime.now(),
-            'expire_soon': (expiration_date - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION,
-            'creation_date': str(whois_info.creation_date),
-            'updated_dates': type(updated_dates) == datetime and str(updated_dates) or updated_dates,
-            'country': whois_info.country,
+
+            'domain_name': process_values(whois_info.domain_name),
+            "name_servers": process_values_rm_symbols(whois_info.name_servers, r"\s*\r?\n\s*"),
+            'registrar': process_values_rm_symbols(whois_info.registrar, r"\s+d/b/a\s+"),
+
+            'expiration_date': process_creation_dates(whois_info.expiration_date),
+            'expired': check_expired < datetime.now(),
+            'expire_soon': (check_expired - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION,
+            'creation_date': process_creation_dates(whois_info.creation_date),
+            'updated_dates': process_creation_dates(whois_info.updated_date),
+
+            'emails': process_values(whois_info.emails),
+
+            'address': process_values(whois_info.address),
+            'city': process_values(whois_info.city),
+            'state': process_values(whois_info.state),
+            'country': process_values(whois_info.country),
+            'registrant_postal_code': process_values(whois_info.registrant_postal_code),
         }
 
     def create_string(self):
@@ -177,5 +216,4 @@ async def main() -> None:
 
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
