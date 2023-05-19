@@ -7,6 +7,7 @@ from typing import NamedTuple, Dict, Union
 from attr import attrs, attrib, Factory
 import re
 
+
 # noinspection PyPackageRequirements
 import whois
 # noinspection PyPackageRequirements
