@@ -117,7 +117,7 @@ class DomainChecker(object):
                 if "REDACTED FOR PRIVACY" in values:
                     values.remove("REDACTED FOR PRIVACY")
                     if len(values) == 0:
-                        values = None
+                        values = []
             return values
 
         return {
