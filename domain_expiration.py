@@ -7,7 +7,6 @@ from typing import NamedTuple, Dict, Union
 from attr import attrs, attrib, Factory
 import re
 
-
 # noinspection PyPackageRequirements
 import whois
 # noinspection PyPackageRequirements
@@ -76,16 +75,23 @@ class DomainChecker(object):
         starts async jobs from the main script file
         :return: None
         """
-        whois_info = whois.whois(self.config.target_domain)
-        print(whois_info)
-        s=1
+        whois_info = None
+        try:
+            whois_info = whois.whois(self.config.target_domain)
+            print(whois_info)
+        except PywhoisError:
+            self.result = NOT_EXIST_RESULT
+
         if await self.is_registered():
             self.result = self.parse_info(whois_info)
+
         else:
-            if 'request limit exceeded\r\n' in whois_info.text:
-                self.result = RESULT_REQUEST_LIMIT
-            else:
-                self.result = NOT_EXIST_RESULT
+            if whois_info:
+                if 'request limit exceeded\r\n' in whois_info.text:
+                    self.result = RESULT_REQUEST_LIMIT
+
+                else:
+                    self.result = NOT_EXIST_RESULT
 
         self.create_string()
 
@@ -111,7 +117,7 @@ class DomainChecker(object):
         exp_soon = None
         try:
             (check_expired - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION
-        except TypeError: # Handle this
+        except TypeError:  # Handle this
             exp_soon = None
 
         def process_values_rm_symbols(values, delimiters_pattern):
