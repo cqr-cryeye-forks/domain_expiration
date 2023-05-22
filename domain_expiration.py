@@ -14,7 +14,8 @@ import whois
 from whois.parser import PywhoisError, WhoisEntry
 
 DEFAULT_DAYS_EXPIRATION = 60
-NOT_EXIST_RESULT = {'domain': 'Not Exist', 'exist': False, 'expired': True}
+NOT_EXIST_RESULT = {'domain': 'Not Exist', 'exist': False, 'request_limit': False}
+RESULT_REQUEST_LIMIT = {'domain': 'Not Exist', 'exist': False, 'request_limit': True}
 
 
 class RunConfig(NamedTuple):
@@ -75,12 +76,16 @@ class DomainChecker(object):
         starts async jobs from the main script file
         :return: None
         """
+        whois_info = whois.whois(self.config.target_domain)
+        print(whois_info)
+        s=1
         if await self.is_registered():
-            whois_info = whois.whois(self.config.target_domain)
             self.result = self.parse_info(whois_info)
         else:
-            self.result = NOT_EXIST_RESULT
-            x=1
+            if 'request limit exceeded\r\n' in whois_info.text:
+                self.result = RESULT_REQUEST_LIMIT
+            else:
+                self.result = NOT_EXIST_RESULT
 
         self.create_string()
 
@@ -97,6 +102,17 @@ class DomainChecker(object):
 
         check_expired = whois_info.expiration_date[0] if type(whois_info.expiration_date) == list \
             else whois_info.expiration_date
+
+        try:
+            exp_check = check_expired < datetime.now()
+        except TypeError:  # Handle this
+            exp_check = None
+
+        exp_soon = None
+        try:
+            (check_expired - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION
+        except TypeError: # Handle this
+            exp_soon = None
 
         def process_values_rm_symbols(values, delimiters_pattern):
             if values:
@@ -146,8 +162,8 @@ class DomainChecker(object):
             'registrar': process_values_rm_symbols(whois_info.registrar, r"\s+d/b/a\s+"),
 
             'expiration_date': expiration_date,
-            'expired': check_expired < datetime.now(),
-            'expire_soon': (check_expired - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION,
+            'expired': exp_check,
+            'expire_soon': exp_soon,
             'creation_date': creation_date,
             'updated_date': updated_date,
 
@@ -173,6 +189,7 @@ class DomainChecker(object):
         """
         try:
             w = whois.whois(self.config.target_domain)
+
         except (PywhoisError, socket.herror):
             return False
         else:
