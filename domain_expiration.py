@@ -104,7 +104,7 @@ class DomainChecker(object):
     @staticmethod
     def parse_info(whois_info: WhoisEntry) -> Dict[str, str]:
 
-        debug_check_info_from_whois = whois_info
+        debug_check_info_from = whois_info
 
         check_expired = whois_info.expiration_date[0] if type(whois_info.expiration_date) == list \
             else whois_info.expiration_date
