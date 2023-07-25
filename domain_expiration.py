@@ -104,7 +104,7 @@ class DomainChecker(object):
     @staticmethod
     def parse_info(whois_info: WhoisEntry) -> Dict[str, str]:
 
-        debug_check_info_from = whois_info
+        whois_info_data = whois_info
 
         check_expired = whois_info.expiration_date[0] if type(whois_info.expiration_date) == list \
             else whois_info.expiration_date
@@ -114,11 +114,10 @@ class DomainChecker(object):
         except TypeError:  # Handle this
             exp_check = None
 
-        exp_soon = None
         try:
-            (check_expired - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION
+            exp_soon = (check_expired - datetime.now()).days <= DEFAULT_DAYS_EXPIRATION
         except TypeError:  # Handle this
-            exp_soon = None
+            exp_soon = False
 
         def process_values_rm_symbols(values, delimiters_pattern):
             if values:
@@ -131,7 +130,7 @@ class DomainChecker(object):
             if dates:
                 if not isinstance(dates, list):
                     dates = [dates]
-                dates = [date.strftime('%Y-%m-%d, %H:%M:%S') for date in dates]
+                dates = [date.isoformat() for date in dates]
             return dates
 
         def process_values(values):
