@@ -1,4 +1,4 @@
-asyncio
-attr
-attrs
-python-whois
+asyncio==3.4.3
+attr==0.3.2
+attrs==23.2.0
+python-whois==0.9.4
