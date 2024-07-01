@@ -1,9 +1,10 @@
 import json
+import pathlib
 import socket
 import asyncio
 import argparse
 from datetime import datetime
-from typing import NamedTuple, Dict, Union
+from typing import NamedTuple, Dict, Union, Final
 from attr import attrs, attrib, Factory
 import re
 
@@ -103,8 +104,6 @@ class DomainChecker(object):
 
     @staticmethod
     def parse_info(whois_info: WhoisEntry) -> Dict[str, str]:
-
-        whois_info_data = whois_info
 
         check_expired = whois_info.expiration_date[0] if type(whois_info.expiration_date) == list \
             else whois_info.expiration_date
@@ -247,6 +246,23 @@ def cli() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def pars_json_data(json_data):
+    def convert_strings_to_list(data):
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if isinstance(value, str):
+                    data[key] = [value]
+                elif isinstance(value, dict) or isinstance(value, list):
+                    convert_strings_to_list(value)
+        elif isinstance(data, list):
+            for i in range(len(data)):
+                if isinstance(data[i], dict) or isinstance(data[i], list):
+                    convert_strings_to_list(data[i])
+
+    convert_strings_to_list(json_data)
+    return json_data
+
+
 async def main() -> None:
     parsed_args = cli()
     run_config = define_config_from_cmd(parsed_args=parsed_args)
@@ -256,3 +272,14 @@ async def main() -> None:
 
 if __name__ == '__main__':
     asyncio.run(main())
+
+    MAIN_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
+    OUTPUT_JSON: Final[pathlib.Path] = MAIN_DIR / cli().output
+
+    with open(OUTPUT_JSON, "r") as jf:
+        data = json.load(jf)
+    data = pars_json_data(data)
+    with open(OUTPUT_JSON, "w") as jf:
+        json.dump(data, jf, indent=2)
+
+# --target [DOMAIN] --output data.json --write --json --quiet
